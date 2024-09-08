@@ -7,8 +7,8 @@ from pyproj import Proj
 import glob
 
 # directory to import and save
-direc1 = 'D:/traj200/'
-dir_app = "D:/wrf_data/210816/"
+direc1 = 'traj200/'
+dir_app = "wrf_data/210816/"
 
 r_ns_raw = [100, -100]  # [200, -160]
 r_ew_raw = [100, -90]  # [150, -150]
@@ -34,8 +34,8 @@ def cal_tv(t_pot, qv, p):
     return tv
 
 
-def interp_wrf_3d(windstart_utc):
-    raw_nc = nc.Dataset(dir_app + "raw_dat/" + windstart_utc.strftime("%Y-%m-%d_%H%M%S.nc"), "r")
+def interp_wrf_3d(data_file, windstart_utc):
+    raw_nc = nc.Dataset(data_file, "r")
     # calculate which layer is the maximum to be required
     z_asl_raw = np.array(
         (raw_nc.variables["PH"][:time_slice, :-1, r_ns_raw[0]:r_ns_raw[1], r_ew_raw[0]:r_ew_raw[1]] +
@@ -141,7 +141,7 @@ def interp_wrf_3d(windstart_utc):
             rho_intp = np.concatenate([rho_intp, rho_intp1])
 
     # export as a netCDF file
-    intp_nc = nc.Dataset(dir_app + "intp_dat/" + windstart_utc.strftime("%Y-%m-%d_%H%M%S_intp.nc"), "w",
+    intp_nc = nc.Dataset(windstart_utc.strftime("%Y-%m-%d_%H%M%S_intp.nc"), "w",
                          format="NETCDF3_CLASSIC")
     intp_nc.createDimension("time", time_slice)
     intp_nc.createDimension("lon", len(lon_intp))
@@ -207,7 +207,17 @@ def interp_wrf_3d(windstart_utc):
     intp_nc.close()
 
 
-filelist = glob.glob(dir_app + "raw_dat/" + '/*.nc')
+'''filelist = ['2021-08-16_120000.nc']
+print(filelist)
 for file in filelist:
     windstart_utc = dt.datetime.strptime(file[-20:].replace(".nc", ""), "%Y-%m-%d_%H%M%S")
-    interp_wrf_3d(windstart_utc)
+    print(windstart_utc)'''
+interp_wrf_3d('2005-08-28_000000.nc', '2005-08-28 00:00:00')
+
+
+
+"""
+- need to refactor for windows
+- cannot read file with original code
+- might remove the iteration for reading file
+"""
